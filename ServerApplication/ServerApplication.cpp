@@ -19,7 +19,7 @@
 #define DEFAULT_PORT "27015"
 #define DEFAULT_BUFLEN 512
 
-WSADATA wsaData;
+
 
 void initWinSocket();
 
@@ -27,18 +27,19 @@ void initWinSocket();
 
 int main(int argc, const char* argv[])
 {
+	WSADATA wsaData;
 	bool end = false;
 	int recvbuflen = DEFAULT_BUFLEN;
 
 	char *sendbuf = "this is a test";
 	char recvbuf[DEFAULT_BUFLEN];
 
-	while (end != true)
+	SOCKET ConnectSocket = INVALID_SOCKET;
+
+	int iResult;
+
+	do
 	{
-		SOCKET ConnectSocket = INVALID_SOCKET;
-
-		int iResult;
-
 		/*Initialize Winsock*/
 		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (iResult != 0)
@@ -78,10 +79,6 @@ int main(int argc, const char* argv[])
 			WSACleanup();
 			return 1;
 		}
-
-
-		std::cout << "Wollen Sie die Konsole beenden?" << std::endl;
-		std::cin >> end;
 
 		//Connect to server
 		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
@@ -152,9 +149,17 @@ int main(int argc, const char* argv[])
 			printf("shutdown failed: %d\n", WSAGetLastError());
 			closesocket(ConnectSocket);
 			WSACleanup();
-			return 1
+			return 1;
 		}
-	}
+
+		//Cleanup
+		closesocket(ConnectSocket);
+		WSACleanup();
+
+		std::cout << "Wollen Sie die Konsole beenden?" << std::endl;
+		std::cin >> end;
+
+	}while (end != true);
 
     return 0;
 }
